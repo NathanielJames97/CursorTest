@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
   cursorTrail.style.height = "20px";
   cursorTrail.style.borderRadius = "100%";
   cursorTrail.style.opacity = "0.5";
+  cursorTrail.style.filter = "blur(10px)"; // Add a blur effect
   document.body.appendChild(cursorTrail);
 });
 
@@ -36,7 +37,7 @@ function updateCursorTrail(event) {
   cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
-  if (cursorMovedDistance >= 250) {
+  if (cursorMovedDistance >= 175) {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
@@ -65,6 +66,7 @@ function updateCursorTrail(event) {
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
+      trailPoint.style.filter = "blur(5px)"; // Add a blur effect
       document.body.appendChild(trailPoint);
     }
 
@@ -75,9 +77,10 @@ function updateCursorTrail(event) {
     // Update trail point color
     trailPoint.style.backgroundColor = point.color;
 
-    // Calculate the opacity based on the time elapsed since the trail point was created
-    var elapsed = new Date().getTime() - point.time;
-    var opacity = 1 - elapsed / trailDuration;
+    // Calculate the opacity based on the elapsed time since the point was added
+    var now = new Date().getTime();
+    var elapsed = now - point.time;
+    var opacity = 0.5 - elapsed / trailDuration; // Gradually fade out the trail point
     trailPoint.style.opacity = opacity;
 
     // Remove the trail point if its opacity reaches 0
@@ -101,6 +104,9 @@ function updateCursorTrailColor() {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
+    cursorStartPosition.x = 0;
+    cursorStartPosition.y = 0;
+    cursorMovedDistance = 0;
   } else {
     // Update cursor trail color based on inactivity time
     var color = getColorFromHeatmap(inactiveTime);
