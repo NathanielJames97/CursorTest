@@ -36,7 +36,7 @@ function updateCursorTrail(event) {
   cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
-  if (cursorMovedDistance >= 100) {
+  if (cursorMovedDistance >= 40) {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
@@ -47,9 +47,9 @@ function updateCursorTrail(event) {
 
   // Add current position and color to trailPoints array
   var color = getColorFromHeatmap(inactiveTime);
-  trailPoints.push({ x: x, y: y, color: color });
+  trailPoints.push({ x: x, y: y, color: color, time: new Date().getTime() });
 
-  // Update trail points positions and colors
+  // Update trail points positions and fade out effect
   for (var i = 0; i < trailPoints.length; i++) {
     var point = trailPoints[i];
     var trailPoint = document.getElementById("trail-point-" + i);
@@ -71,6 +71,18 @@ function updateCursorTrail(event) {
     // Update trail point position
     trailPoint.style.top = point.y + "px";
     trailPoint.style.left = point.x + "px";
+
+    // Calculate the opacity based on the time elapsed since the trail point was created
+    var elapsed = new Date().getTime() - point.time;
+    var opacity = 1 - elapsed / trailDuration;
+    trailPoint.style.opacity = opacity;
+
+    // Remove the trail point if its opacity reaches 0
+    if (opacity <= 0) {
+      document.body.removeChild(trailPoint);
+      trailPoints.splice(i, 1);
+      i--;
+    }
   }
 }
 
