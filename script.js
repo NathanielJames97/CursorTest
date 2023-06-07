@@ -81,14 +81,13 @@ function getColorFromHeatmap(time) {
   var hueRange = 240; // Range of hues to use for heatmap colors
 
   // Calculate the hue based on the ratio of inactive time to max inactive time
-  var ratio = Math.min(time / maxInactiveTime, 1);
+  var ratio = 1 - Math.min(time / maxInactiveTime, 1);
   var hue = Math.floor(ratio * hueRange);
+  var saturation = 100; // Fixed saturation value
+  var lightness = 50; // Fixed lightness value
 
-  // Convert hue to RGB color
-  var rgb = hsvToRgb(hue / 360, 1, 1);
-
-  // Return the RGB color as CSS value
-  return "rgb(" + rgb.join(",") + ")";
+  // Convert HSL values to CSS color representation
+  return "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
 }
 
 // Add event listener for mousemove to update cursor trail position and color
