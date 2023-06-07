@@ -2,7 +2,7 @@ var cursorTrail;
 var lastActivityTime = new Date().getTime();
 var inactiveTime = 0;
 var trailDuration = 5000; // 5 seconds
-var trailPoints = []; // Array to store cursor positions for trail
+var trailPoints = []; // Array to store cursor positions and colors for trail
 
 // Wait for DOM content to load
 document.addEventListener("DOMContentLoaded", function () {
@@ -28,10 +28,11 @@ function updateCursorTrail(event) {
   cursorTrail.style.top = y + "px";
   cursorTrail.style.left = x + "px";
 
-  // Add current position to trailPoints array
-  trailPoints.push({ x: x, y: y });
+  // Add current position and color to trailPoints array
+  var color = getColorFromHeatmap(inactiveTime);
+  trailPoints.push({ x: x, y: y, color: color });
 
-  // Update trail points positions
+  // Update trail points positions and colors
   for (var i = 0; i < trailPoints.length; i++) {
     var point = trailPoints[i];
     var trailPoint = document.getElementById("trail-point-" + i);
@@ -44,7 +45,7 @@ function updateCursorTrail(event) {
       trailPoint.style.width = "20px";
       trailPoint.style.height = "20px";
       trailPoint.style.borderRadius = "100%";
-      trailPoint.style.backgroundColor = "#000";
+      trailPoint.style.backgroundColor = point.color;
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
       document.body.appendChild(trailPoint);
