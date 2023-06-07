@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
   cursorTrail.style.borderRadius = "100%";
   cursorTrail.style.opacity = "0.5";
   cursorTrail.style.filter = "blur(10px)"; // Add a blur effect
+  cursorTrail.style.backgroundImage = "linear-gradient(to bottom, #0000ff, #ff0000)"; // Color gradient from blue to red
+  cursorTrail.style.backgroundSize = "100% 200%"; // Increase the size of the gradient for smoother transition
   document.body.appendChild(cursorTrail);
 });
 
@@ -73,6 +75,8 @@ function updateCursorTrail(event) {
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure the trail points are below the main cursor trail
+      trailPoint.style.backgroundImage = "linear-gradient(to bottom, #0000ff, #ff0000)"; // Color gradient from blue to red
+      trailPoint.style.backgroundSize = "100% 200%"; // Increase the size of the gradient for smoother transition
       document.body.appendChild(trailPoint);
     }
 
@@ -117,7 +121,7 @@ function updateCursorTrailColor() {
 
   // Update cursor trail color based on inactivity time and cursor movement
   var currentColor;
-  if (cursorMovedDistance > resetDistance) {
+  if (cursorMovedDistance > bufferZoneDistance) {
     // Cursor has moved far enough, reset the color cycle
     currentColor = getColorFromHeatmap(inactiveTime);
   } else {
@@ -128,7 +132,6 @@ function updateCursorTrailColor() {
   cursorTrail.style.backgroundColor = currentColor;
   lastColor = currentColor;
 }
-
 
 // Get color from heatmap based on time
 function getColorFromHeatmap(time) {
