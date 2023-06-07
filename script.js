@@ -23,8 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
   cursorTrail.style.borderRadius = "100%";
   cursorTrail.style.opacity = "0.5";
   cursorTrail.style.filter = "blur(10px)"; // Add a blur effect
-  cursorTrail.style.backgroundImage = "linear-gradient(to bottom, #0000ff, #ff0000)"; // Color gradient from blue to red
-  cursorTrail.style.backgroundSize = "100% 200%"; // Increase the size of the gradient for smoother transition
   document.body.appendChild(cursorTrail);
 });
 
@@ -75,8 +73,6 @@ function updateCursorTrail(event) {
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure the trail points are below the main cursor trail
-      trailPoint.style.backgroundImage = "linear-gradient(to bottom, #0000ff, #ff0000)"; // Color gradient from blue to red
-      trailPoint.style.backgroundSize = "100% 200%"; // Increase the size of the gradient for smoother transition
       document.body.appendChild(trailPoint);
     }
 
@@ -140,8 +136,19 @@ function getColorFromHeatmap(time) {
   }
 
   // Calculate color values based on time
-  var hue = Math.floor((time / trailDuration) * maxHue);
-  hue = Math.min(Math.max(hue, 0), maxHue); // Clamp hue value within the range [0, maxHue]
+  var hue;
+  if (time <= trailDuration / 5) {
+    hue = 240; // Blue
+  } else if (time <= (2 * trailDuration) / 5) {
+    hue = 180; // Green
+  } else if (time <= (3 * trailDuration) / 5) {
+    hue = 60; // Yellow
+  } else if (time <= (4 * trailDuration) / 5) {
+    hue = 30; // Orange
+  } else {
+    hue = 0; // Red
+  }
+
   var saturation = 100;
   var lightness = 50;
 
@@ -179,5 +186,18 @@ function hslToRgb(h, s, l) {
 }
 
 // Event listeners
-document.addEventListener("mousemove", updateCursorTrail);
-setInterval(updateCursorTrailColor, 100); // Update cursor trail color every 100 milliseconds
+document.addEventListener("mousemove", function (event) {
+  updateCursorTrail(event);
+});
+
+document.addEventListener("keydown", function (event) {
+  updateCursorTrailColor();
+});
+
+document.addEventListener("mousedown", function (event) {
+  updateCursorTrailColor();
+});
+
+document.addEventListener("scroll", function (event) {
+  updateCursorTrailColor();
+});
