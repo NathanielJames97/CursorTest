@@ -136,68 +136,46 @@ function getColorFromHeatmap(time) {
   }
 
   // Calculate color values based on time
-  var hue;
-  if (time <= trailDuration / 5) {
-    hue = 240; // Blue
-  } else if (time <= (2 * trailDuration) / 5) {
-    hue = 180; // Green
-  } else if (time <= (3 * trailDuration) / 5) {
-    hue = 60; // Yellow
-  } else if (time <= (4 * trailDuration) / 5) {
-    hue = 30; // Orange
-  } else {
-    hue = 0; // Red
-  }
-
-  var saturation = 100;
-  var lightness = 50;
-
-  // Convert HSL color to RGB
-  var rgb = hslToRgb(hue / 360, saturation / 100, lightness / 100);
-
-  // Format RGB values as CSS color string
+  var hue = (time / trailDuration) * 240;
+  var rgb = hsvToRgb(hue / 360, 1, 1);
   return "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
 }
 
-// Convert HSL color to RGB
-function hslToRgb(h, s, l) {
+// Convert HSV color to RGB
+function hsvToRgb(h, s, v) {
   var r, g, b;
+  var i = Math.floor(h * 6);
+  var f = h * 6 - i;
+  var p = v * (1 - s);
+  var q = v * (1 - f * s);
+  var t = v * (1 - (1 - f) * s);
 
-  if (s === 0) {
-    r = g = b = l; // Achromatic
-  } else {
-    function hue2rgb(p, q, t) {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1 / 6) return p + (q - p) * 6 * t;
-      if (t < 1 / 2) return q;
-      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-      return p;
-    }
-
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    var p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
+  switch (i % 6) {
+    case 0:
+      (r = v), (g = t), (b = p);
+      break;
+    case 1:
+      (r = q), (g = v), (b = p);
+      break;
+    case 2:
+      (r = p), (g = v), (b = t);
+      break;
+    case 3:
+      (r = p), (g = q), (b = v);
+      break;
+    case 4:
+      (r = t), (g = p), (b = v);
+      break;
+    case 5:
+      (r = v), (g = p), (b = q);
+      break;
   }
 
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-// Event listeners
-document.addEventListener("mousemove", function (event) {
-  updateCursorTrail(event);
-});
+// Add event listener to update cursor trail position
+document.addEventListener("mousemove", updateCursorTrail);
 
-document.addEventListener("keydown", function (event) {
-  updateCursorTrailColor();
-});
-
-document.addEventListener("mousedown", function (event) {
-  updateCursorTrailColor();
-});
-
-document.addEventListener("scroll", function (event) {
-  updateCursorTrailColor();
-});
+// Update cursor trail color at regular intervals
+setInterval(updateCursorTrailColor, 100);
