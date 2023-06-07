@@ -6,4 +6,7 @@
     pointer-events: none;
     transition: opacity 1s linear;
   }
-  
+
+  body {
+    background-color: #000;
+  }

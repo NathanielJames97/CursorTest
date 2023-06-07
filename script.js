@@ -5,6 +5,7 @@ var trailDuration = 5000; // 5 seconds
 var trailPoints = []; // Array to store cursor positions and colors for trail
 var cursorStartPosition = { x: 0, y: 0 }; // Store the initial cursor position
 var cursorMovedDistance = 0; // Distance moved by the cursor
+var maxHue = 240; // Maximum hue value for heatmap color
 
 // Wait for DOM content to load
 document.addEventListener("DOMContentLoaded", function () {
@@ -37,7 +38,7 @@ function updateCursorTrail(event) {
   cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
-  if (cursorMovedDistance >= 175) {
+  if (cursorMovedDistance >= 100) {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
@@ -66,7 +67,7 @@ function updateCursorTrail(event) {
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
-      trailPoint.style.filter = "blur(2px)"; // Add a blur effect
+      trailPoint.style.filter = "blur(5px)"; // Add a blur effect
       document.body.appendChild(trailPoint);
     }
 
@@ -77,7 +78,7 @@ function updateCursorTrail(event) {
     // Update trail point color
     trailPoint.style.backgroundColor = point.color;
 
-    // Calculate the opacity based on the elapsed time since the point was added
+    // Calculate the elapsed time since the point was added
     var now = new Date().getTime();
     var elapsed = now - point.time;
     var opacity = 0.5 - elapsed / trailDuration; // Gradually fade out the trail point
@@ -116,15 +117,9 @@ function updateCursorTrailColor() {
 
 // Get color from heatmap based on time
 function getColorFromHeatmap(time) {
-  var maxInactiveTime = trailDuration; // Maximum inactivity time for full heatmap color
-
-  // Calculate the hue based on the ratio of inactive time to max inactive time
-  var ratio = 1 - Math.min(time / maxInactiveTime, 1);
-  var hue = Math.floor(240 * ratio); // Hue range from 0 to 240 (blue to red)
-  var saturation = 100; // Fixed saturation value
-  var lightness = 50; // Fixed lightness value
-
-  // Convert HSL values to CSS color representation
+  var hue = Math.floor((time / trailDuration) * maxHue);
+  var saturation = 100;
+  var lightness = 50;
   return "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
 }
 
