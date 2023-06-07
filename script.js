@@ -3,6 +3,8 @@ var lastActivityTime = new Date().getTime();
 var inactiveTime = 0;
 var trailDuration = 5000; // 5 seconds
 var trailPoints = []; // Array to store cursor positions and colors for trail
+var cursorStartPosition = { x: 0, y: 0 }; // Store the initial cursor position
+var cursorMovedDistance = 0; // Distance moved by the cursor
 
 // Wait for DOM content to load
 document.addEventListener("DOMContentLoaded", function () {
@@ -27,6 +29,21 @@ function updateCursorTrail(event) {
   // Update cursor trail position
   cursorTrail.style.top = y + "px";
   cursorTrail.style.left = x + "px";
+
+  // Calculate the distance moved by the cursor
+  var deltaX = x - cursorStartPosition.x;
+  var deltaY = y - cursorStartPosition.y;
+  cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+  // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
+  if (cursorMovedDistance >= 40) {
+    inactiveTime = 0;
+    cursorTrail.style.top = "-100px";
+    cursorTrail.style.left = "-100px";
+    cursorStartPosition.x = x;
+    cursorStartPosition.y = y;
+    cursorMovedDistance = 0;
+  }
 
   // Add current position and color to trailPoints array
   var color = getColorFromHeatmap(inactiveTime);
