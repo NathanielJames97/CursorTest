@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   cursorTrail.style.width = "20px";
   cursorTrail.style.height = "20px";
   cursorTrail.style.borderRadius = "100%";
-  cursorTrail.style.backgroundColor = "#000";
+  cursorTrail.style.opacity = "0.5";
   document.body.appendChild(cursorTrail);
 });
 
@@ -36,7 +36,7 @@ function updateCursorTrail(event) {
   cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
-  if (cursorMovedDistance >= 100) {
+  if (cursorMovedDistance >= 250) {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
@@ -62,7 +62,7 @@ function updateCursorTrail(event) {
       trailPoint.style.width = "20px";
       trailPoint.style.height = "20px";
       trailPoint.style.borderRadius = "100%";
-      trailPoint.style.backgroundColor = point.color;
+      trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
       document.body.appendChild(trailPoint);
@@ -71,6 +71,9 @@ function updateCursorTrail(event) {
     // Update trail point position
     trailPoint.style.top = point.y + "px";
     trailPoint.style.left = point.x + "px";
+
+    // Update trail point color
+    trailPoint.style.backgroundColor = point.color;
 
     // Calculate the opacity based on the time elapsed since the trail point was created
     var elapsed = new Date().getTime() - point.time;
@@ -108,11 +111,10 @@ function updateCursorTrailColor() {
 // Get color from heatmap based on time
 function getColorFromHeatmap(time) {
   var maxInactiveTime = trailDuration; // Maximum inactivity time for full heatmap color
-  var hueRange = 240; // Range of hues to use for heatmap colors
 
   // Calculate the hue based on the ratio of inactive time to max inactive time
   var ratio = 1 - Math.min(time / maxInactiveTime, 1);
-  var hue = Math.floor(ratio * hueRange);
+  var hue = Math.floor(240 * ratio); // Hue range from 0 to 240 (blue to red)
   var saturation = 100; // Fixed saturation value
   var lightness = 50; // Fixed lightness value
 
