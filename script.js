@@ -66,7 +66,7 @@ function updateCursorTrail(event) {
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
       trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
-      trailPoint.style.filter = "blur(5px)"; // Add a blur effect
+      trailPoint.style.filter = "blur(2px)"; // Add a blur effect
       document.body.appendChild(trailPoint);
     }
 
