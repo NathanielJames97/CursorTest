@@ -6,6 +6,9 @@ var trailPoints = []; // Array to store cursor positions and colors for trail
 var cursorStartPosition = { x: 0, y: 0 }; // Store the initial cursor position
 var cursorMovedDistance = 0; // Distance moved by the cursor
 var maxHue = 240; // Maximum hue value for heatmap color
+var bufferZoneDistance = 100; // Distance threshold to enter the buffer zone
+var inBufferZone = false;
+var lastColor = getColorFromHeatmap(inactiveTime);
 
 // Wait for DOM content to load
 document.addEventListener("DOMContentLoaded", function () {
@@ -38,13 +41,16 @@ function updateCursorTrail(event) {
   cursorMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // Reset inactive time and cursor trail position if the cursor moved beyond the threshold distance
-  if (cursorMovedDistance >= 100) {
+  if (cursorMovedDistance >= bufferZoneDistance) {
     inactiveTime = 0;
     cursorTrail.style.top = "-100px";
     cursorTrail.style.left = "-100px";
     cursorStartPosition.x = x;
     cursorStartPosition.y = y;
     cursorMovedDistance = 0;
+
+    // Set inBufferZone to false when cursor moves outside the buffer zone
+    inBufferZone = false;
   }
 
   // Add current position and color to trailPoints array
@@ -66,8 +72,7 @@ function updateCursorTrail(event) {
       trailPoint.style.borderRadius = "100%";
       trailPoint.style.opacity = "0.5";
       trailPoint.style.pointerEvents = "none";
-      trailPoint.style.zIndex = "9998"; // Ensure trail points are below the cursor trail
-      trailPoint.style.filter = "blur(5px)"; // Add a blur effect
+      trailPoint.style.zIndex = "9998"; // Ensure the trail points are below the main cursor trail
       document.body.appendChild(trailPoint);
     }
 
@@ -108,23 +113,68 @@ function updateCursorTrailColor() {
     cursorStartPosition.x = 0;
     cursorStartPosition.y = 0;
     cursorMovedDistance = 0;
-  } else {
-    // Update cursor trail color based on inactivity time
-    var color = getColorFromHeatmap(inactiveTime);
-    cursorTrail.style.backgroundColor = color;
   }
+
+  // Update cursor trail color based on inactivity time and cursor movement
+  var currentColor;
+  if (cursorMovedDistance > resetDistance) {
+    // Cursor has moved far enough, reset the color cycle
+    currentColor = getColorFromHeatmap(inactiveTime);
+  } else {
+    // Cursor hasn't moved far enough, keep the last color
+    currentColor = lastColor;
+  }
+
+  cursorTrail.style.backgroundColor = currentColor;
+  lastColor = currentColor;
 }
+
 
 // Get color from heatmap based on time
 function getColorFromHeatmap(time) {
+  if (time >= trailDuration) {
+    return lastColor; // Return last color if cursor is idle beyond trail duration
+  }
+
+  // Calculate color values based on time
   var hue = Math.floor((time / trailDuration) * maxHue);
+  hue = Math.min(Math.max(hue, 0), maxHue); // Clamp hue value within the range [0, maxHue]
   var saturation = 100;
   var lightness = 50;
-  return "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
+
+  // Convert HSL color to RGB
+  var rgb = hslToRgb(hue / 360, saturation / 100, lightness / 100);
+
+  // Format RGB values as CSS color string
+  return "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
 }
 
-// Add event listener for mousemove to update cursor trail position and color
-document.addEventListener("mousemove", function (event) {
-  updateCursorTrail(event);
-  updateCursorTrailColor();
-});
+// Convert HSL color to RGB
+function hslToRgb(h, s, l) {
+  var r, g, b;
+
+  if (s === 0) {
+    r = g = b = l; // Achromatic
+  } else {
+    function hue2rgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    }
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+// Event listeners
+document.addEventListener("mousemove", updateCursorTrail);
+setInterval(updateCursorTrailColor, 100); // Update cursor trail color every 100 milliseconds
